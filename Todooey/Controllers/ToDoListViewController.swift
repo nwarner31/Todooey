@@ -10,21 +10,31 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
 
-    var itemArray = ["Find a new Job","Get into shape","Study to be an iOS Developer","Eat healthy"]
+    var stringArray = ["Find a new Job","Get into shape","Study to be an iOS Developer","Eat healthy"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
     override func viewDidLoad() {
         super.viewDidLoad()
        
-        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
-            itemArray = items
+        for itemString in stringArray {
+            let item = Item(title: itemString, isDone: false)
+            itemArray.append(item)
         }
+        
+//        if let items = defaults.array(forKey: "ToDoListArray") as? [String] {
+//            itemArray = items
+//        }
     }
 
     // MARK - TableView Datasource methods
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoTableCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
+        cell.accessoryType = item.isDone ? .checkmark : .none
+        
         return cell
         
     }
@@ -37,8 +47,8 @@ class ToDoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
         
-        let cell = tableView.cellForRow(at: indexPath)
-        cell?.accessoryType = cell?.accessoryType != .checkmark ? .checkmark : .none
+        itemArray[indexPath.row].isDone = !itemArray[indexPath.row].isDone
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -51,8 +61,10 @@ class ToDoListViewController: UITableViewController {
         let alert = UIAlertController(title: "Add new Todooey item", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-            self.itemArray.append(textField.text!)
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            
+            let item = Item(title: textField.text!, isDone: false)
+            self.itemArray.append(item)
+            //self.defaults.set(self.itemArray, forKey: "ToDoListArray")
             self.tableView.reloadData()
         }
         
